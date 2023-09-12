@@ -1,0 +1,118 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "8d81ddf7",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 1489 entries, 0 to 1488\n",
+      "Data columns (total 17 columns):\n",
+      " #   Column                                                      Non-Null Count  Dtype   \n",
+      "---  ------                                                      --------------  -----   \n",
+      " 0   Project Geographic District                                 1489 non-null   category\n",
+      " 1   Project Phase Name                                          1489 non-null   category\n",
+      " 2   week_duration                                               1489 non-null   float64 \n",
+      " 3   week_delays                                                 1489 non-null   float64 \n",
+      " 4   Project Budget Amount                                       1489 non-null   float64 \n",
+      " 5   Final Estimate of Actual Costs Through End of Phase Amount  1489 non-null   float64 \n",
+      " 6   Total Phase Actual Spending Amount                          1489 non-null   float64 \n",
+      " 7   Work 1                                                      1489 non-null   category\n",
+      " 8   Work 2                                                      1489 non-null   category\n",
+      " 9   Work 3                                                      1489 non-null   category\n",
+      " 10  Work 4                                                      1489 non-null   category\n",
+      " 11  Work 5                                                      1489 non-null   category\n",
+      " 12  Work 6                                                      1489 non-null   category\n",
+      " 13  Work 7                                                      1489 non-null   category\n",
+      " 14  Work 8                                                      1489 non-null   category\n",
+      " 15  Work 9                                                      1489 non-null   category\n",
+      " 16  Work 10                                                     1489 non-null   category\n",
+      "dtypes: category(12), float64(5)\n",
+      "memory usage: 78.4 KB\n",
+      "Cross validation scores: [0.46040836 0.85562634 0.75508213 0.72799655 0.85887393]\n",
+      "Mean score: 0.7315974607720228\n",
+      "R-squared score: 0.6835631449885683\n",
+      "Mean Absolute Error: 5.1331803333622315\n",
+      "Mean Squared Error: 111.51848160092311\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.neural_network import MLPRegressor\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.model_selection import train_test_split, cross_val_score\n",
+    "from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error\n",
+    "import pandas as pd\n",
+    "\n",
+    "data = pd.read_csv('Processed_Data.csv')\n",
+    "\n",
+    "data = data.astype({\"Project Geographic District \" : 'category', 'Project Phase Name': 'category', \n",
+    "                         'Work 1': 'category', 'Work 2' : 'category', 'Work 3': 'category', 'Work 4' : 'category',\n",
+    "                         'Work 5' : 'category', 'Work 6' : 'category', 'Work 7': 'category', 'Work 8' : 'category',\n",
+    "                         'Work 9' : 'category', 'Work 10' : 'category'})\n",
+    "\n",
+    "data.info()\n",
+    "\n",
+    "X = data.drop(columns = ['week_delays', 'Total Phase Actual Spending Amount'])\n",
+    "y = data['week_delays']\n",
+    "\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)\n",
+    "\n",
+    "sc_X = StandardScaler()\n",
+    "X_trainscaled=sc_X.fit_transform(X_train)\n",
+    "X_testscaled=sc_X.transform(X_test)\n",
+    "\n",
+    "reg = MLPRegressor(hidden_layer_sizes=(64,64,64),activation=\"relu\", max_iter=2000)\n",
+    "\n",
+    "#k-fold cross validation\n",
+    "k = 5\n",
+    "scores = cross_val_score(reg, X_trainscaled, y_train, cv = k)\n",
+    "print(\"Cross validation scores:\", scores)\n",
+    "print(\"Mean score:\", scores.mean())\n",
+    "\n",
+    "reg.fit(X_trainscaled, y_train)\n",
+    "y_pred=reg.predict(X_testscaled)\n",
+    "\n",
+    "print(\"R-squared score:\", r2_score(y_test, y_pred))\n",
+    "print(\"Mean Absolute Error:\", mean_absolute_error(y_test, y_pred))\n",
+    "print(\"Mean Squared Error:\", mean_squared_error(y_test, y_pred))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2bfbcc44",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

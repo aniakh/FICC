@@ -1,0 +1,133 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "b450c31a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 1489 entries, 0 to 1488\n",
+      "Data columns (total 17 columns):\n",
+      " #   Column                                                      Non-Null Count  Dtype   \n",
+      "---  ------                                                      --------------  -----   \n",
+      " 0   Project Geographic District                                 1489 non-null   category\n",
+      " 1   Project Phase Name                                          1489 non-null   category\n",
+      " 2   week_duration                                               1489 non-null   float64 \n",
+      " 3   week_delays                                                 1489 non-null   float64 \n",
+      " 4   Project Budget Amount                                       1489 non-null   float64 \n",
+      " 5   Final Estimate of Actual Costs Through End of Phase Amount  1489 non-null   float64 \n",
+      " 6   Total Phase Actual Spending Amount                          1489 non-null   float64 \n",
+      " 7   Work 1                                                      1489 non-null   category\n",
+      " 8   Work 2                                                      1489 non-null   category\n",
+      " 9   Work 3                                                      1489 non-null   category\n",
+      " 10  Work 4                                                      1489 non-null   category\n",
+      " 11  Work 5                                                      1489 non-null   category\n",
+      " 12  Work 6                                                      1489 non-null   category\n",
+      " 13  Work 7                                                      1489 non-null   category\n",
+      " 14  Work 8                                                      1489 non-null   category\n",
+      " 15  Work 9                                                      1489 non-null   category\n",
+      " 16  Work 10                                                     1489 non-null   category\n",
+      "dtypes: category(12), float64(5)\n",
+      "memory usage: 78.4 KB\n",
+      "Delay Model Evaluation:\n",
+      "Score: 71.24\n",
+      "Mean Absolute Error: 8.36\n",
+      "Mean Squared Error: 145.61\n",
+      "\n",
+      "Total Phase Actual Spending Amount Model Evaluation:\n",
+      "Score: 97.62\n",
+      "Mean Absolute Error: 38127.56\n",
+      "Mean Squared Error: 6102901345.81\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.metrics import mean_absolute_error, mean_squared_error\n",
+    "\n",
+    "data = pd.read_csv('Processed_Data.csv')\n",
+    "\n",
+    "data = data.astype({\"Project Geographic District \" : 'category', 'Project Phase Name': 'category', \n",
+    "                         'Work 1': 'category', 'Work 2' : 'category', 'Work 3': 'category', 'Work 4' : 'category',\n",
+    "                         'Work 5' : 'category', 'Work 6' : 'category', 'Work 7': 'category', 'Work 8' : 'category',\n",
+    "                         'Work 9' : 'category', 'Work 10' : 'category'})\n",
+    "\n",
+    "data.info()\n",
+    "\n",
+    "X = data.drop(columns = ['week_delays', 'Total Phase Actual Spending Amount'])\n",
+    "y1 = data['week_delays']\n",
+    "y2 = data['Total Phase Actual Spending Amount']\n",
+    "\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X, y1, test_size = 0.15, random_state = 2)\n",
+    "\n",
+    "model1 = LinearRegression()\n",
+    "model1.fit(X_train, y_train)\n",
+    "\n",
+    "X2_train, X2_test, y2_train, y2_test = train_test_split(X, y2, test_size = 0.2, random_state = 2)\n",
+    "model2 = LinearRegression()\n",
+    "model2.fit(X2_train, y2_train)\n",
+    "\n",
+    "accuracy1 = model1.score(X_test, y_test)\n",
+    "accuracy2 = model2.score(X2_test, y2_test)\n",
+    "\n",
+    "y_pred1 = model1.predict(X_test)\n",
+    "y_pred2 = model2.predict(X2_test)\n",
+    "\n",
+    "mae1 = mean_absolute_error(y_test, y_pred1)\n",
+    "mse1 = mean_squared_error(y_test, y_pred1)\n",
+    "\n",
+    "\n",
+    "mae2 = mean_absolute_error(y2_test, y_pred2)\n",
+    "mse2 = mean_squared_error(y2_test, y_pred2)\n",
+    "\n",
+    "print(f'Delay Model Evaluation:')\n",
+    "print(f'Score: {accuracy1 * 100:.2f}')\n",
+    "print(f'Mean Absolute Error: {mae1:.2f}')\n",
+    "print(f'Mean Squared Error: {mse1:.2f}')\n",
+    "print()\n",
+    "print(f'Total Phase Actual Spending Amount Model Evaluation:')\n",
+    "print(f'Score: {accuracy2 * 100:.2f}')\n",
+    "print(f'Mean Absolute Error: {mae2:.2f}')\n",
+    "print(f'Mean Squared Error: {mse2:.2f}')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7aaade0b",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
